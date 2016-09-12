@@ -28,6 +28,11 @@ br.set_handle_refresh(False)
 br.addheaders = [('User-agent','Mac Safari')]
 
 
+
+response = br.get("http://www.google.com/finance/info?infotype=infoquoteall&q=" + stockSymbol)
+statusCode = response.code
+print statusCode
+
 response = br.open("http://www.google.com/finance/info?infotype=infoquoteall&q=" + stockSymbol)
 print response.read()
 
