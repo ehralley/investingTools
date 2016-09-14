@@ -1,15 +1,8 @@
 import mechanize
-from bs4 import BeautifulSoup as BS
+from bs4 import BeautifulSoup
 
-while 1:
-	print "Please Input Stock Symbol: "
-	stockSymbolInput = raw_input()
-	if stockSymbolInput.isalpha():
-		break
-	print "Symbol input not a string, please try again"
 
-stockCountry = 'US'
-stockSymbol = stockSymbolInput
+
 
 br = mechanize.Browser()
 
@@ -28,11 +21,55 @@ br.set_handle_refresh(False)
 br.addheaders = [('User-agent','Mac Safari')]
 
 
-response = br.open("http://www.google.com/finance/info?infotype=infoquoteall&q=" + stockSymbol)
-print response.read()
+while 1:
+	try:
+		print "Please Input Stock Symbol: "
+		stockSymbolInput = raw_input()
+		response = br.retrieve("http://www.google.com/finance/info?infotype=infoquoteall&q=" + stockSymbolInput, 'GoogleData.txt')
+	except:
+		print "Google can't find that stock symbol, try again"
+	else:
+		break
 
-response = br.open("http://www.stock2own.com/StockAnalysis/Stock/" + stockCountry + "/" + stockSymbol + "/")
-# for form in br.forms():
-# 	print form.name
-print br.title()
-# print br.forms()
+print "working..."
+file = open("GoogleData.txt","r")
+for line in file.readlines():
+	if line.find('''"e" :''') != -1:
+		exchangeName = (line.split('''"'''))[3]
+file.close()
+
+usExchanges = ['NASDAQ','NYSE','AMEX']
+canExchanges = ['TSE']
+
+if exchangeName.upper() in usExchanges:
+	stockCountry = 'US'
+elif exchangeName.upper() in canExchanges:
+	stockCountry = 'CA'
+
+br.open("http://www.stock2own.com/StockAnalysis/Stock/" + stockCountry + "/" + stockSymbolInput + "/")
+soup = BeautifulSoup(br.response().read(), "html.parser")
+
+table = soup.find("table", id="RawFinData_Ann")
+# print table
+
+
+roicList = []
+
+tableHead = soup.find("thead")
+roicName = soup.find("abbr", title="*Return on Invested Capital")
+
+for date, value in zip(tableHead.stripped_strings, roicName.parent.parent.stripped_strings):
+	try:
+		roicList.append([date,float(value)])
+	except:
+		continue
+
+print "Annual ROIC Data for " + stockSymbolInput.upper()
+for element in roicList:
+	print element[0] + ": " + "%.2f" % (element[1])
+
+
+# print soup.find_all(string="ROIC")
+
+
+
