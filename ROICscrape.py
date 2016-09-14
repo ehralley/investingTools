@@ -31,7 +31,7 @@ while 1:
 	else:
 		break
 
-# print response.read()
+print "working..."
 file = open("GoogleData.txt","r")
 for line in file.readlines():
 	if line.find('''"e" :''') != -1:
@@ -53,8 +53,23 @@ table = soup.find("table", id="RawFinData_Ann")
 # print table
 
 
+roicList = []
+
 tableHead = soup.find("thead")
-for string in tableHead.stripped_strings:
-	print string
+roicName = soup.find("abbr", title="*Return on Invested Capital")
+
+for date, value in zip(tableHead.stripped_strings, roicName.parent.parent.stripped_strings):
+	try:
+		roicList.append([date,float(value)])
+	except:
+		continue
+
+print "Annual ROIC Data for " + stockSymbolInput.upper()
+for element in roicList:
+	print element[0] + ": " + "%.2f" % (element[1])
+
+
+# print soup.find_all(string="ROIC")
+
 
 
