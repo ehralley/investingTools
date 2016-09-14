@@ -47,11 +47,14 @@ elif exchangeName.upper() in canExchanges:
 	stockCountry = 'CA'
 
 br.open("http://www.stock2own.com/StockAnalysis/Stock/" + stockCountry + "/" + stockSymbolInput + "/")
-soup = BeautifulSoup(br.response().read())
-print soup.prettify()[0:100]
+soup = BeautifulSoup(br.response().read(), "html.parser")
+
+table = soup.find("table", id="RawFinData_Ann")
+# print table
 
 
+tableHead = soup.find("thead")
+for string in tableHead.stripped_strings:
+	print string
 
-
-print br.title()
 
